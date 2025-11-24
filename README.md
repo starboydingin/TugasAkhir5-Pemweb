@@ -1,93 +1,109 @@
-Interactive Calculator (Kalkulator Interaktif)
+📱 Interactive Calculator – Web App
 
-Kalkulator Interaktif ini merupakan aplikasi kalkulator modern berbasis web yang dibuat menggunakan HTML, JavaScript, dan Tailwind CSS. Aplikasi ini memiliki tampilan estetik dengan desain gradasi hijau muda → hijau tua, serta dilengkapi fitur lengkap untuk kebutuhan perhitungan dasar maupun lanjutan.
+Kalkulator Interaktif ini adalah aplikasi kalkulator modern berbasis web, dirancang dengan tampilan estetik menggunakan Tailwind CSS dan efek glassmorphism. Aplikasi ini tidak hanya mendukung operasi dasar, tetapi juga fitur lanjutan seperti riwayat perhitungan, memory function, dan dukungan keyboard.
 
-🚀 Fitur Utama
-1. Interface Kalkulator
+🎨 Tampilan & Desain
 
-Display utama untuk menampilkan angka, input, dan hasil perhitungan
+Tema gradasi hijau muda → hijau tua
 
-Tombol angka 0–9
+Desain clean, modern, dan responsif
 
-Tombol operasi: + , − , × , ÷
+Antarmuka ramah pengguna untuk mobile maupun desktop
 
-Tombol Clear (C) dan Clear Entry (CE)
+🧩 Fitur Interface
 
-Tombol Equals (=) untuk menghitung
+Display utama untuk menampilkan angka & hasil
 
-Tombol Decimal point (.)
+Tombol angka: 0–9
 
-⚙️ Functionality
+Tombol operator:
 
-Operasi aritmatika dasar:
+Tambah (+)
 
-Penjumlahan
+Kurang (−)
 
-Pengurangan
+Kali (×)
 
-Perkalian
+Bagi (÷)
 
-Pembagian
+Tombol Clear:
+
+C (Clear all)
+
+CE (Clear entry)
+
+Tombol Equals (=)
+
+Tombol Decimal (.)
+
+⚙️ Fungsi Perhitungan
+
+Operasi aritmatika dasar: tambah, kurang, kali, bagi
 
 Perhitungan berantai
-Contoh: 5 + 3 × 2 → mengikuti prioritas operator
+Mendukung prioritas operator (contoh: 5 + 3 × 2)
 
-Error handling untuk pembagian dengan nol
+Error handling otomatis
 
-Dukungan keyboard:
+Menampilkan pesan error jika terjadi pembagian dengan nol
 
-Angka (0–9)
+Keyboard Support
+
+Angka 0–9
 
 Operator (+ - * /)
 
-Enter (=)
+Enter / "="
 
 Backspace
 
-Escape (Clear)
+Escape
 
-🧠 Advanced Features
+🧠 Fitur Lanjutan
+1. History Perhitungan
 
-History perhitungan
-Menyimpan hingga 5 perhitungan terakhir, lengkap dengan ekspresi dan hasilnya
+Menyimpan 5 riwayat terakhir
 
-Memory Functions seperti kalkulator profesional:
+Riwayat dapat diklik untuk mengembalikan hasil ke display
 
-M+ → Tambah ke memori
+Tersedia tombol untuk hapus riwayat
 
-M- → Kurangi dari memori
+2. Memory Functions
 
-MR → Recall / ambil nilai memori
+Mirip kalkulator profesional:
 
-MC → Bersihkan memori
+M+ → Tambah angka ke memori
 
-Responsive Design
-Tampilan otomatis menyesuaikan untuk:
+M- → Kurangi angka dari memori
 
-Mobile
+MR → Recall nilai memori
+
+MC → Hapus memori
+
+3. Responsive Design
+
+Layout otomatis menyesuaikan perangkat:
+
+Smartphone
 
 Tablet
 
 Desktop
 
-🎨 Desain
+📂 Struktur Aplikasi
 
-Menggunakan Tailwind CSS
+Semua kode (HTML + JavaScript + Tailwind) sudah digabungkan dalam satu file index.html, sehingga:
 
-Tampilan modern dengan efek glassmorphism
+Mudah dipindahkan
 
-Warna tema gradasi hijau muda → hijau tua
+Mudah di-deploy
 
-Layout elegan untuk kalkulator dan panel riwayat
+Tidak membutuhkan file tambahan
 
-📂 Struktur
+🚀 Cara Menggunakan
 
-Semua kode (HTML, JS, dan style Tailwind) telah digabungkan dalam satu file index.html sehingga mudah digunakan atau dipindahkan ke project lain.
+Download atau salin file index.html
 
-📎 Cara Menggunakan
+Buka file tersebut melalui browser (Chrome, Firefox, Edge, dll.)
 
-Download atau copy file index.html
-
-Buka file tersebut di browser apa saja (Chrome, Edge, Firefox, dll)
-
-Kalkulator siap digunakan!
+Gunakan kalkulator seperti biasa — semua fitur langsung aktif
