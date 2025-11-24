@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalkulator Interaktif</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      .history-list::-webkit-scrollbar {
+        width: 6px;
+      }
+      .history-list::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen bg-gradient-to-br from-green-200 to-green-600 flex items-center justify-center p-4">
+    <div class="absolute top-6 text-green-900">
+        <h1 class="text-4xl font-bold mb-6 text-center">Kalkulator Interaktif</h1>
+    </div>
+
+    <div class="bg-white/20 backdrop-blur-xl shadow-2xl rounded-2xl flex flex-wrap md:flex-nowrap w-full max-w-5xl overflow-hidden">
+
+      <div class="w-full md:w-2/3 p-6">
+
+        <div class="mb-4">
+          <div id="memoryIndicator" class="text-sm text-green-900 font-semibold"></div>
+
+          <div id="display" class="text-right text-5xl font-bold bg-white/60 p-4 rounded-xl shadow-inner">
+            0
+          </div>
+
+          <div id="expression" class="text-right text-green-900 mt-1 text-sm min-h-5"></div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-3">
+
+          <button class="btn memory bg-green-800 text-white py-3 rounded-xl" data-action="mc">MC</button>
+          <button class="btn memory bg-green-800 text-white py-3 rounded-xl" data-action="mr">MR</button>
+          <button class="btn memory bg-green-800 text-white py-3 rounded-xl" data-action="m-">M-</button>
+          <button class="btn memory bg-green-800 text-white py-3 rounded-xl" data-action="m+">M+</button>
+
+          <button class="btn clear bg-red-500 text-white py-3 rounded-xl" data-action="ce">CE</button>
+          <button class="btn clear bg-red-600 text-white py-3 rounded-xl" data-action="c">C</button>
+          <button class="btn operator bg-green-700 text-white py-3 rounded-xl" data-operator="/">÷</button>
+          <button class="btn operator bg-green-700 text-white py-3 rounded-xl" data-operator="*">×</button>
+
+          <button class="btn number bg-white/80 py-3 rounded-xl text-xl" data-number="7">7</button>
+          <button class="btn number bg-white/80 py-3 rounded-xl text-xl" data-number="8">8</button>
+          <button class="btn number bg-white/80 py-3 rounded-xl text-xl" data-number="9">9</button>
+          <button class="btn operator bg-green-700 text-white py-3 rounded-xl" data-operator="-">-</button>
+
+          <button class="btn number bg-white/80 py-3 rounded-xl text-xl" data-number="4">4</button>
+          <button class="btn number bg-white/80 py-3 rounded-xl text-xl" data-number="5">5</button>
+          <button class="btn number bg-white/80 py-3 rounded-xl text-xl" data-number="6">6</button>
+          <button class="btn operator bg-green-700 text-white py-3 rounded-xl" data-operator="+">+</button>
+
+          <button class="btn number bg-white/80 py-3 rounded-xl text-xl" data-number="1">1</button>
+          <button class="btn number bg-white/80 py-3 rounded-xl text-xl" data-number="2">2</button>
+          <button class="btn number bg-white/80 py-3 rounded-xl text-xl" data-number="3">3</button>
+
+          <button class="btn equals bg-green-900 text-white py-3 rounded-xl row-span-2 flex items-center justify-center text-xl" data-action="=">=</button>
+
+          <button class="btn number zero bg-white/80 py-3 rounded-xl col-span-2 text-xl" data-number="0">0</button>
+          <button class="btn decimal bg-white/80 py-3 rounded-xl text-xl" data-action=".">.</button>
+        </div>
+      </div>
+
+      <div class="w-full md:w-1/3 bg-white/30 border-l border-white/40 p-4">
+
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-lg font-semibold text-green-900">Riwayat Perhitungan</h3>
+          <button id="clearHistory" class="text-red-600 font-semibold hover:underline">Hapus</button>
+        </div>
+
+        <div id="historyList" class="history-list max-h-96 overflow-y-auto pr-2 text-green-950">
+          <p class="no-history text-green-900">Tidak ada riwayat</p>
+        </div>
+      </div>
+
+    </div>
+
+    <script>
+      let currentValue = '0';
+      let expressionChain = [];
+      let waitingForOperand = false;
+      let memory = 0;
+      let history = [];
+      const MAX_HISTORY = 5;
+
+      const display = document.getElementById('display');
+      const expression = document.getElementById('expression');
+      const memoryIndicator = document.getElementById('memoryIndicator');
+      const historyList = document.getElementById('historyList');
+      const clearHistoryBtn = document.getElementById('clearHistory');
+
+      document.addEventListener('DOMContentLoaded', () => {
+        loadHistory();
+        updateDisplay();
+        attachEventListeners();
+      });
+
+      function attachEventListeners() {
+        document.querySelectorAll('.btn.number').forEach((btn) => {
+          btn.addEventListener('click', () => handleNumber(btn.dataset.number));
+        });
+
+        document.querySelectorAll('.btn.operator').forEach((btn) => {
+          btn.addEventListener('click', () => handleOperator(btn.dataset.operator));
+        });
+
+        document.querySelectorAll('[data-action]').forEach((btn) => {
+          btn.addEventListener('click', () => handleAction(btn.dataset.action));
+        });
+
+        clearHistoryBtn.addEventListener('click', clearAllHistory);
+        document.addEventListener('keydown', handleKeyboard);
+      }
+
+      function handleNumber(num) {
+        if (waitingForOperand) {
+          currentValue = num;
+          waitingForOperand = false;
+        } else {
+          if (currentValue === '0' || currentValue === 'Error') currentValue = num;
+          else currentValue += num;
+        }
+        updateDisplay();
+      }
+
+      function handleOperator(nextOperator) {
+        const inputValue = parseFloat(currentValue);
+        if (isNaN(inputValue)) return;
+
+        if (waitingForOperand && expressionChain.length > 0) {
+          expressionChain[expressionChain.length - 1] = nextOperator;
+        } else {
+          expressionChain.push(inputValue);
+          expressionChain.push(nextOperator);
+        }
+
+        waitingForOperand = true;
+        updateExpression();
+      }
+
+      function handleAction(action) {
+        switch (action) {
+          case '=': handleEquals(); break;
+          case 'c': clearAll(); break;
+          case 'ce': clearEntry(); break;
+          case '.': handleDecimal(); break;
+          case 'mc': memoryClear(); break;
+          case 'mr': memoryRecall(); break;
+          case 'm+': memoryAdd(); break;
+          case 'm-': memorySubtract(); break;
+        }
+      }
+
+      function handleEquals() {
+        if (expressionChain.length === 0) return;
+
+        const inputValue = parseFloat(currentValue);
+        if (isNaN(inputValue)) return;
+
+        if (expressionChain.length % 2 === 0) expressionChain.push(inputValue);
+
+        const result = evaluateExpression(expressionChain);
+
+        if (result === 'Error') {
+          currentValue = 'Error';
+          updateDisplay();
+          setTimeout(() => clearAll(), 2000);
+          return;
+        }
+
+        addToHistory(formatExpressionForHistory(expressionChain), result);
+
+        currentValue = String(result);
+        expressionChain = [];
+        waitingForOperand = true;
+        expression.textContent = '';
+        updateDisplay();
+      }
+
+      function evaluateExpression(chain) {
+        if (chain.length === 0) return 0;
+        if (chain.length === 1) return chain[0];
+
+        let expr = [...chain];
+
+        let i = 1;
+        while (i < expr.length) {
+          const operator = expr[i];
+          if (operator === '*' || operator === '/') {
+            const left = expr[i - 1];
+            const right = expr[i + 1];
+            if (operator === '/' && right === 0) return 'Error';
+            const result = operator === '*' ? left * right : left / right;
+            expr.splice(i - 1, 3, result);
+          } else i += 2;
+        }
+
+        i = 1;
+        while (i < expr.length) {
+          const operator = expr[i];
+          if (operator === '+' || operator === '-') {
+            const left = expr[i - 1];
+            const right = expr[i + 1];
+            const result = operator === '+' ? left + right : left - right;
+            expr.splice(i - 1, 3, result);
+          } else i += 2;
+        }
+
+        return Math.round(expr[0] * 100000000) / 100000000;
+      }
+
+      function formatExpressionForHistory(chain) {
+        let result = '';
+        for (let i = 0; i < chain.length; i++) {
+          result += i % 2 === 0 ? chain[i] : ' ' + getOperatorSymbol(chain[i]) + ' ';
+        }
+        return result;
+      }
+
+      function clearAll() {
+        currentValue = '0';
+        expressionChain = [];
+        waitingForOperand = false;
+        expression.textContent = '';
+        updateDisplay();
+      }
+
+      function clearEntry() {
+        currentValue = '0';
+        updateDisplay();
+      }
+
+      function handleDecimal() {
+        if (currentValue === 'Error') currentValue = '0';
+        if (waitingForOperand) {
+          currentValue = '0.';
+          waitingForOperand = false;
+        } else if (!currentValue.includes('.')) currentValue += '.';
+        updateDisplay();
+      }
+
+      function memoryClear() {
+        memory = 0; updateMemoryIndicator();
+      }
+
+      function memoryRecall() {
+        currentValue = String(memory);
+        waitingForOperand = true;
+        updateDisplay();
+      }
+
+      function memoryAdd() {
+        memory += parseFloat(currentValue);
+        updateMemoryIndicator();
+      }
+
+      function memorySubtract() {
+        memory -= parseFloat(currentValue);
+        updateMemoryIndicator();
+      }
+
+      function updateMemoryIndicator() {
+        memoryIndicator.textContent = memory !== 0 ? 'M' : '';
+      }
+
+      function addToHistory(expr, result) {
+        history.unshift({ expression: expr, result, timestamp: Date.now() });
+        if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
+        saveHistory();
+        renderHistory();
+      }
+
+      function renderHistory() {
+        historyList.innerHTML = '';
+        if (history.length === 0) {
+          historyList.innerHTML = '<p class="no-history text-green-900">Belum ada riwayat</p>';
+          return;
+        }
+
+        history.forEach(item => {
+          const div = document.createElement('div');
+          div.className = "p-3 mb-2 bg-white/60 rounded-xl shadow cursor-pointer hover:bg-white";
+          div.innerHTML = `
+            <div class="text-sm">${item.expression}</div>
+            <div class="font-bold">= ${item.result}</div>
+          `;
+          div.addEventListener('click', () => {
+            currentValue = String(item.result);
+            waitingForOperand = true;
+            updateDisplay();
+          });
+
+          historyList.appendChild(div);
+        });
+      }
+
+      function clearAllHistory() {
+        if (confirm('Hapus semua riwayat perhitungan?')) {
+          history = [];
+          saveHistory();
+          renderHistory();
+        }
+      }
+
+      function saveHistory() {
+        localStorage.setItem('calculatorHistory', JSON.stringify(history));
+      }
+
+      function loadHistory() {
+        const saved = localStorage.getItem('calculatorHistory');
+        if (saved) {
+          history = JSON.parse(saved);
+          renderHistory();
+        }
+      }
+
+      function handleKeyboard(e) {
+        e.preventDefault();
+        if (e.key >= '0' && e.key <= '9') handleNumber(e.key);
+        else if (['+', '-', '*', '/'].includes(e.key)) handleOperator(e.key);
+        else if (e.key === 'Enter' || e.key === '=') handleEquals();
+        else if (e.key === '.' || e.key === ',') handleDecimal();
+        else if (e.key === 'Escape') clearAll();
+        else if (e.key === 'Backspace') {
+          if (currentValue.length > 1) currentValue = currentValue.slice(0, -1);
+          else currentValue = '0';
+          updateDisplay();
+        }
+      }
+
+      function updateDisplay() {
+        display.textContent = formatNumber(currentValue);
+      }
+
+      function updateExpression() {
+        if (expressionChain.length > 0) {
+          expression.textContent = expressionChain
+            .map((v, i) => i % 2 === 0 ? v : " " + getOperatorSymbol(v) + " ")
+            .join("");
+        } else expression.textContent = '';
+      }
+
+      function formatNumber(value) {
+        if (value === 'Error') return 'Error: Tidak dapat dibagi 0';
+        const num = parseFloat(value);
+        if (isNaN(num)) return value;
+        if (Math.abs(num) >= 1000)
+          return num.toLocaleString("id-ID", { maximumFractionDigits: 8 });
+        return value;
+      }
+
+      function getOperatorSymbol(op) {
+        return { '+': '+', '-': '-', '*': '×', '/': '÷' }[op] || op;
+      }
+
+      document.querySelectorAll('.btn.operator').forEach((btn) => {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('.btn.operator').forEach((b) => b.classList.remove('active'));
+          if (waitingForOperand) this.classList.add('active');
+        });
+      });
+
+      document.querySelector('.btn.equals').addEventListener('click', () => {
+        document.querySelectorAll('.btn.operator').forEach((b) => b.classList.remove('active'));
+      });
+    </script>
+
+  </body>
+</html>
